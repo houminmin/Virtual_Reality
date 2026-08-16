@@ -1,7 +1,8 @@
 # Virtual Reality (novel website)
 
 This is the public reader-facing site for the novel. It's built from a
-private source repository and synced here automatically.
+private source repository and synced here automatically — see
+`.github/workflows/` in the source repo for the sync pipeline.
 
 ## License
 
