@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>虚拟现实</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+</head>
+<body>
+  <main>
+    <h1 id="chapter-title"></h1>
+    <div class="chapter-body" id="chapter-body">
+      <p class="status" id="chapter-status"></p>
+    </div>
+    <nav class="chapter-nav">
+      <a id="nav-prev" href="#"></a>
+      <a id="nav-home" href="#"></a>
+      <a id="nav-next" href="#"></a>
+    </nav>
+  </main>
+
+  <script src="chapters.js"></script>
+  <script>
+    const lang = getLang();
+    const book = BOOKS[lang];
+
+    document.documentElement.lang = lang === "zh" ? "zh-CN" : lang;
+    document.title = book.title;
+    document.getElementById("chapter-status").textContent = book.labels.loading;
+
+    const prev = document.getElementById("nav-prev");
+    const home = document.getElementById("nav-home");
+    const next = document.getElementById("nav-next");
+    prev.textContent = book.labels.prev;
+    next.textContent = book.labels.next;
+    home.textContent = book.labels.home;
+    home.href = withLang("index.html", lang);
+
+    async function loadChapter() {
+      const body = document.getElementById("chapter-body");
+      const titleEl = document.getElementById("chapter-title");
+
+      const n = parseInt(new URLSearchParams(location.search).get("n"), 10);
+      if (!(n >= 1 && n <= book.files.length)) {
+        body.innerHTML = "";
+        const p = document.createElement("p");
+        p.className = "status";
+        p.textContent = book.labels.badChapter;
+        body.appendChild(p);
+        prev.classList.add("placeholder");
+        next.classList.add("placeholder");
+        return;
+      }
+
+      try {
+        const md = await fetchChapter(book, book.files[n - 1]);
+        const title = extractTitle(md);
+
+        // 第一行作为标题单独渲染，其余作为正文
+        const lines = md.split(/\r?\n/);
+        const firstContent = lines.findIndex((l) => l.trim());
+        const bodyMd = lines.slice(firstContent + 1).join("\n");
+
+        titleEl.textContent = title;
+        document.title = title + " · " + book.title;
+        body.innerHTML = marked.parse(bodyMd);
+
+        if (n > 1) prev.href = withLang("chapter.html?n=" + (n - 1), lang);
+        else prev.classList.add("placeholder");
+        if (n < book.files.length) next.href = withLang("chapter.html?n=" + (n + 1), lang);
+        else next.classList.add("placeholder");
+      } catch (err) {
+        body.innerHTML = "";
+        const p = document.createElement("p");
+        p.className = "status";
+        p.textContent = book.labels.chapterError + err.message;
+        body.appendChild(p);
+      }
+    }
+    loadChapter();
+  </script>
+
+  <footer style="margin-top: 3em; padding: 1em 0; font-size: 0.85em; color: #888; text-align: center;">
+    © 2026 Minmin Hou. Novel text licensed under
+    <a href="https://creativecommons.org/licenses/by-nd/4.0/" style="color: inherit;">CC BY-ND 4.0</a>.
+  </footer>
+</body>
+</html>
