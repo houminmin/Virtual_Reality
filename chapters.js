@@ -15,7 +15,6 @@ const BOOKS = {
       "chapter_7.md",
       "chapter_8.md",
       "chapter_9.md",
-      "chapter_10.md",
     ],
     labels: {
       subtitle: "目录",
@@ -43,7 +42,6 @@ const BOOKS = {
       "chapter_7.md",
       "chapter_8.md",
       "chapter_9.md",
-      "chapter_10.md",
     ],
     labels: {
       subtitle: "Table of Contents",
